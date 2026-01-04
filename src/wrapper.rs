@@ -7,9 +7,9 @@ use std::cell::RefCell;
 use std::cmp::PartialEq;
 use std::collections::{HashMap, HashSet};
 
-pub trait Wrapper<'a, 'b> {
-    fn wheres(&self) -> &Vec<Where<'b>>;
-    fn wheres_push(&mut self, r#where: Where<'b>);
+pub trait Wrapper<'a> {
+    fn wheres(&self) -> &Vec<Where<'a>>;
+    fn wheres_push(&mut self, r#where: Where<'a>);
     fn or_index(&self) -> &HashSet<usize>;
     fn or_index_insert(&mut self, index: usize);
     fn bracket(&self) -> &Bracket;
@@ -17,7 +17,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn eq<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -26,7 +26,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn eq_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -36,7 +36,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn eq_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn eq_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -45,7 +45,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn eq_field_flag<F, V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn eq_field_flag<F, V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -58,7 +58,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn ne<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -67,7 +67,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn ne_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -77,7 +77,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn ne_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn ne_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -86,7 +86,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn ne_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn ne_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -99,7 +99,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn gt<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -108,7 +108,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn gt_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -118,7 +118,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn gt_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn gt_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -127,7 +127,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn gt_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn gt_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -140,7 +140,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn ge<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -149,7 +149,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn ge_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -159,7 +159,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn ge_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn ge_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -168,7 +168,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn ge_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn ge_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -181,7 +181,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn lt<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -190,7 +190,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn lt_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -200,7 +200,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn lt_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn lt_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -209,7 +209,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn lt_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn lt_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -222,7 +222,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn le<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -231,7 +231,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn le_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -241,7 +241,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn le_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn le_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -250,7 +250,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn le_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn le_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -263,7 +263,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn between<F, V>(self, field_func: F, value_left: V, value_right: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -278,7 +278,7 @@ pub trait Wrapper<'a, 'b> {
         flag: bool,
     ) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -288,7 +288,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn between_field<V>(mut self, field: &'b str, value_left: V, value_right: V) -> Self
+    fn between_field<V>(mut self, field: &'a str, value_left: V, value_right: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -303,7 +303,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn between_field_flag<V>(
         mut self,
-        field: &'b str,
+        field: &'a str,
         value_left: V,
         value_right: V,
         flag: bool,
@@ -320,7 +320,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn not_between<F, V>(self, field_func: F, value_left: V, value_right: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -335,7 +335,7 @@ pub trait Wrapper<'a, 'b> {
         flag: bool,
     ) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -345,7 +345,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn not_between_field<V>(mut self, field: &'b str, value_left: V, value_right: V) -> Self
+    fn not_between_field<V>(mut self, field: &'a str, value_left: V, value_right: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -360,7 +360,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn not_between_field_flag<V>(
         mut self,
-        field: &'b str,
+        field: &'a str,
         value_left: V,
         value_right: V,
         flag: bool,
@@ -377,7 +377,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn like<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -386,7 +386,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn like_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -396,7 +396,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn like_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn like_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -405,7 +405,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn like_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn like_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -418,7 +418,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn not_like<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -427,7 +427,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn not_like_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -437,7 +437,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn not_like_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn not_like_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -446,7 +446,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn not_like_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn not_like_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -459,7 +459,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn like_left<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -468,7 +468,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn like_left_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -478,7 +478,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn like_left_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn like_left_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -491,7 +491,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn like_left_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn like_left_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -504,7 +504,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn like_right<F, V>(self, field_func: F, value: V) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -513,7 +513,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn like_right_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -523,7 +523,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn like_right_field<V>(mut self, field: &'b str, value: V) -> Self
+    fn like_right_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -536,7 +536,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn like_right_field_flag<V>(mut self, field: &'b str, value: V, flag: bool) -> Self
+    fn like_right_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -549,7 +549,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn r#in<F, V>(self, field_func: F, values: Vec<V>) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -558,7 +558,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn in_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -568,7 +568,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn in_field<V>(mut self, field: &'b str, values: Vec<V>) -> Self
+    fn in_field<V>(mut self, field: &'a str, values: Vec<V>) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -581,7 +581,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn in_field_flag<V>(mut self, field: &'b str, values: Vec<V>, flag: bool) -> Self
+    fn in_field_flag<V>(mut self, field: &'a str, values: Vec<V>, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -594,7 +594,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn not_in<F, V>(self, field_func: F, values: Vec<V>) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -603,7 +603,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn not_in_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -613,7 +613,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn not_in_field<V>(mut self, field: &'b str, values: Vec<V>) -> Self
+    fn not_in_field<V>(mut self, field: &'a str, values: Vec<V>) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -626,7 +626,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn not_in_field_flag<V>(mut self, field: &'b str, values: Vec<V>, flag: bool) -> Self
+    fn not_in_field_flag<V>(mut self, field: &'a str, values: Vec<V>, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -639,7 +639,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn null<F, V>(self, field_func: F) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -648,7 +648,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn null_flag<F, V>(mut self, field_func: F, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -658,7 +658,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn null_field<V>(mut self, field: &'b str) -> Self
+    fn null_field<V>(mut self, field: &'a str) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -667,7 +667,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn null_field_flag<V>(mut self, field: &'b str, flag: bool) -> Self
+    fn null_field_flag<V>(mut self, field: &'a str, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -680,7 +680,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn not_null<F, V>(self, field_func: F) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -689,7 +689,7 @@ pub trait Wrapper<'a, 'b> {
 
     fn not_null_flag<F, V>(mut self, field_func: F, flag: bool) -> Self
     where
-        F: FnOnce() -> LambdaField<'b>,
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
@@ -699,7 +699,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn not_null_field<V>(mut self, field: &'b str) -> Self
+    fn not_null_field<V>(mut self, field: &'a str) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -708,7 +708,7 @@ pub trait Wrapper<'a, 'b> {
         self
     }
 
-    fn not_null_field_flag<V>(mut self, field: &'b str, flag: bool) -> Self
+    fn not_null_field_flag<V>(mut self, field: &'a str, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -946,14 +946,14 @@ pub trait Wrapper<'a, 'b> {
     }
 }
 
-pub struct Where<'b> {
-    field: &'b str,
+pub struct Where<'a> {
+    field: &'a str,
     relationship: Relationship,
     values: Vec<SqlValue>,
 }
 
-impl<'b> Where<'b> {
-    fn new(field: &'b str, relationship: Relationship, values: Vec<SqlValue>) -> Self {
+impl<'a> Where<'a> {
+    fn new(field: &'a str, relationship: Relationship, values: Vec<SqlValue>) -> Self {
         Self {
             field,
             relationship,
@@ -1035,13 +1035,41 @@ impl Bracket {
     }
 }
 
-pub(crate) struct Order<'c> {
-    pub(crate) field: &'c str,
+pub(crate) struct GroupHaving<'a> {
+    fields: Vec<&'a str>,
+    having: Option<&'a str>,
+    values: Vec<SqlValue>,
+}
+
+impl<'a> GroupHaving<'a> {
+    pub(crate) fn new() -> Self {
+        Self {
+            fields: vec![],
+            having: None,
+            values: vec![],
+        }
+    }
+
+    pub(crate) fn field_push(&mut self, field: &'a str) {
+        self.fields.push(field);
+    }
+
+    pub(crate) fn having(&mut self, having: &'a str) {
+        self.having = Some(having);
+    }
+
+    pub(crate) fn value_push(&mut self, values: SqlValue) {
+        self.values.push(values);
+    }
+}
+
+pub(crate) struct Order<'a> {
+    pub(crate) field: &'a str,
     pub(crate) asc_desc: bool,
 }
 
-impl<'c> Order<'c> {
-    pub fn new(field: &'c str, asc_desc: bool) -> Self {
+impl<'a> Order<'a> {
+    pub fn new(field: &'a str, asc_desc: bool) -> Self {
         Self { field, asc_desc }
     }
 }

@@ -11,33 +11,6 @@ trait MySqlRepository<
 {
     fn get_db(&self) -> &MySqlPool;
 
-    async fn query() {}
-
-    async fn vec(&self) -> Result<Vec<E>> {
-        sqlx::query_as(&format!("SELECT * FROM {}", E::table_name()))
-            .fetch_all(self.get_db())
-            .await
-    }
-
-    async fn pagination(&self, offset: u32, size: u32) -> Result<Vec<E>> {
-        sqlx::query_as(&format!("SELECT * FROM {} LIMIT ?, ?", E::table_name()))
-            .bind(offset)
-            .bind(size)
-            .fetch_all(self.get_db())
-            .await
-    }
-
-    async fn get_by_primary_key(&self, primary_key: T) -> Result<Option<E>> {
-        sqlx::query_as(&format!(
-            "SELECT * FROM {} WHERE `{}` = ? LIMIT 1",
-            E::table_name(),
-            E::primary_key()
-        ))
-        .bind(primary_key)
-        .fetch_optional(self.get_db())
-        .await
-    }
-
     async fn save(&self, vo: &mut E) -> Result<u64> {
         let mut insert_sql = format!("INSERT INTO {} ", E::table_name());
         let json = serde_json::to_value(vo);

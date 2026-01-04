@@ -1,20 +1,21 @@
 use crate::Result;
-use crate::wrapper::{Bracket, Order, SqlValue, Where, Wrapper};
+use crate::wrapper::{Bracket, GroupHaving, Order, SqlValue, Where, Wrapper};
 use crate::{Entity, LambdaField};
 use sqlx::mysql::MySqlRow;
 use sqlx::{FromRow, MySql, MySqlPool};
 use std::collections::{HashMap, HashSet};
 use std::marker::PhantomData;
 
-pub struct QueryWrapper<'a, 'b, 'c, 'd, E>
+pub struct QueryWrapper<'a, 'd, E>
 where
     E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin,
 {
     field: Vec<&'a str>,
-    wheres: Vec<Where<'b>>,
+    wheres: Vec<Where<'a>>,
     or_index: HashSet<usize>,
     bracket: Bracket,
-    order: Vec<Order<'c>>,
+    group_having: GroupHaving<'a>,
+    order: Vec<Order<'a>>,
     first: Option<&'a str>,
     last: Option<&'a str>,
     comment: Option<&'a str>,
@@ -22,20 +23,14 @@ where
     _ignore: PhantomData<E>,
 }
 
-impl<'a, 'b, 'c, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
-    QueryWrapper<'a, 'b, 'c, 'd, E>
-{
-}
-
-impl<'a, 'b, 'c, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
-    QueryWrapper<'a, 'b, 'c, 'd, E>
-{
+impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrapper<'a, 'd, E> {
     pub fn new(db: &'d MySqlPool) -> Self {
         Self {
             field: vec![],
             wheres: vec![],
             or_index: HashSet::new(),
             bracket: Bracket::new(),
+            group_having: GroupHaving::new(),
             order: vec![],
             first: None,
             last: None,
@@ -45,16 +40,88 @@ impl<'a, 'b, 'c, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
         }
     }
 
+    pub fn group_by<F>(mut self, field_func: F) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+    {
+        self.group_having.field_push(field_func().0);
+        self
+    }
+
+    pub fn group_by_flag<F>(mut self, field_func: F, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+    {
+        if flag {
+            self = self.group_by(field_func);
+        }
+        self
+    }
+
+    pub fn group_by_vec<F>(mut self, field_func_vec: Vec<F>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+    {
+        for field_func in field_func_vec {
+            self.group_having.field_push(field_func().0);
+        }
+        self
+    }
+
+    pub fn group_by_vec_flag<F>(mut self, field_func_vec: Vec<F>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+    {
+        if flag {
+            self = self.group_by_vec(field_func_vec);
+        }
+        self
+    }
+
+    pub fn having(mut self, having_sql: &'a str) -> Self {
+        self.group_having.having(having_sql);
+        self
+    }
+
+    pub fn having_flag(mut self, having_sql: &'a str, flag: bool) -> Self {
+        if flag {
+            self = self.having(having_sql);
+        }
+        self
+    }
+
+    pub fn having_values<V>(mut self, having_sql: &'a str, values: Vec<V>) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+    {
+        let group_having = &mut self.group_having;
+        group_having.having(having_sql);
+        for value in values {
+            group_having.value_push(value.into());
+        }
+        self
+    }
+
+    pub fn having_values_flag<V>(mut self, having_sql: &'a str, values: Vec<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+    {
+        if flag {
+            self = self.having_values(having_sql, values);
+        }
+        self
+    }
+
     pub fn order_asc<F>(self, field_func: F) -> Self
     where
-        F: FnOnce() -> LambdaField<'c>,
+        F: FnOnce() -> LambdaField<'a>,
     {
         self.order_asc_field(field_func().0)
     }
 
     pub fn order_desc<F>(self, field_func: F) -> Self
     where
-        F: FnOnce() -> LambdaField<'c>,
+        F: FnOnce() -> LambdaField<'a>,
     {
         self.order_desc_field(field_func().0)
     }
@@ -69,12 +136,12 @@ impl<'a, 'b, 'c, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
         self
     }
 
-    pub fn order_asc_field(mut self, field: &'c str) -> Self {
+    pub fn order_asc_field(mut self, field: &'a str) -> Self {
         self.order.push(Order::new(field, true));
         self
     }
 
-    pub fn order_desc_field(mut self, field: &'c str) -> Self {
+    pub fn order_desc_field(mut self, field: &'a str) -> Self {
         self.order.push(Order::new(field, false));
         self
     }
@@ -182,14 +249,14 @@ impl<'a, 'b, 'c, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
     }
 }
 
-impl<'a, 'b, 'c, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'a, 'b>
-    for QueryWrapper<'a, 'b, 'c, 'd, E>
+impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'a>
+    for QueryWrapper<'a, 'd, E>
 {
-    fn wheres(&self) -> &Vec<Where<'b>> {
+    fn wheres(&self) -> &Vec<Where<'a>> {
         &self.wheres
     }
 
-    fn wheres_push(&mut self, r#where: Where<'b>) {
+    fn wheres_push(&mut self, r#where: Where<'a>) {
         self.wheres.push(r#where);
     }
 
@@ -234,12 +301,12 @@ impl<'a, 'b, 'c, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> W
     }
 }
 
-pub struct UpdateWrapper<'a, 'b, 'd, E>
+pub struct UpdateWrapper<'a, 'd, E>
 where
     E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin,
 {
     set: HashMap<&'a str, SqlValue>,
-    wheres: Vec<Where<'b>>,
+    wheres: Vec<Where<'a>>,
     or_index: HashSet<usize>,
     bracket: Bracket,
     first: Option<&'a str>,
@@ -249,9 +316,7 @@ where
     _ignore: PhantomData<E>,
 }
 
-impl<'a, 'b, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
-    UpdateWrapper<'a, 'b, 'd, E>
-{
+impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWrapper<'a, 'd, E> {
     pub fn new(db: &'d MySqlPool) -> Self {
         Self {
             set: HashMap::new(),
@@ -308,14 +373,14 @@ impl<'a, 'b, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
     }
 }
 
-impl<'a, 'b, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'a, 'b>
-    for UpdateWrapper<'a, 'b, 'd, E>
+impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'a>
+    for UpdateWrapper<'a, 'd, E>
 {
-    fn wheres(&self) -> &Vec<Where<'b>> {
+    fn wheres(&self) -> &Vec<Where<'a>> {
         &self.wheres
     }
 
-    fn wheres_push(&mut self, r#where: Where<'b>) {
+    fn wheres_push(&mut self, r#where: Where<'a>) {
         self.wheres.push(r#where);
     }
 
@@ -360,11 +425,11 @@ impl<'a, 'b, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapp
     }
 }
 
-pub struct DeleteWrapper<'a, 'b, 'd, E>
+pub struct RemoveWrapper<'a, 'd, E>
 where
     E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin,
 {
-    wheres: Vec<Where<'b>>,
+    wheres: Vec<Where<'a>>,
     or_index: HashSet<usize>,
     bracket: Bracket,
     first: Option<&'a str>,
@@ -374,9 +439,7 @@ where
     _ignore: PhantomData<E>,
 }
 
-impl<'a, 'b, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
-    DeleteWrapper<'a, 'b, 'd, E>
-{
+impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> RemoveWrapper<'a, 'd, E> {
     pub fn new(db: &'d MySqlPool) -> Self {
         Self {
             wheres: vec![],
@@ -417,14 +480,14 @@ impl<'a, 'b, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin>
     }
 }
 
-impl<'a, 'b, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'a, 'b>
-    for DeleteWrapper<'a, 'b, 'd, E>
+impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'a>
+    for RemoveWrapper<'a, 'd, E>
 {
-    fn wheres(&self) -> &Vec<Where<'b>> {
+    fn wheres(&self) -> &Vec<Where<'a>> {
         &self.wheres
     }
 
-    fn wheres_push(&mut self, r#where: Where<'b>) {
+    fn wheres_push(&mut self, r#where: Where<'a>) {
         self.wheres.push(r#where);
     }
 
