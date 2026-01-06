@@ -1,6 +1,6 @@
 [package]
 name = "batis4sqlx"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 authors = ["W <w793981522@qq.com>"]
@@ -11,4 +11,4 @@ repository = "https://github.com/Wintheres/batis4sqlx"
 [dependencies]
 sqlx = { version = "0.8.6", features = ["mysql", "chrono", "runtime-tokio", "tls-native-tls"] }
 serde = { version = "1.0.219", features = ["derive"] }
-batis4sqlx-macros = "0.1.0"
+batis4sqlx-macros = "0.1.1"
