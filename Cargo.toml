@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 authors = ["W <w793981522@qq.com>"]
-description = "Based on the SQLX framework as the underlying layer, it is an ORM that mimics the style of MyBatis-Plus."
+description = "A personal Rust ORM project built on SQLx, inspired by MyBatis-Plus."
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Wintheres/batis4sqlx"
 

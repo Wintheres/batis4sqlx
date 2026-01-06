@@ -1,1 +1,1 @@
-Based on the SQLX framework as the underlying layer, it is an ORM that mimics the style of MyBatis-Plus.
+A personal Rust ORM project built on SQLx, inspired by MyBatis-Plus.
