@@ -1,4 +1,7 @@
-use crate::{Entity, LambdaField};
+use crate::{
+    Entity, LambdaField,
+    repository::{bind_query, bind_query_as, bind_query_scalar},
+};
 use sqlx::MySql;
 use sqlx::mysql::MySqlArguments;
 use sqlx::query::{Query, QueryAs, QueryScalar};
@@ -547,7 +550,7 @@ pub trait Wrapper<'a> {
         self
     }
 
-    fn r#in<F, V>(self, field_func: F, values: Vec<V>) -> Self
+    fn r#in<F, V>(self, field_func: F, values: HashSet<V>) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
@@ -556,7 +559,7 @@ pub trait Wrapper<'a> {
         self.in_field(field_func().0, values)
     }
 
-    fn in_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
+    fn in_flag<F, V>(mut self, field_func: F, values: HashSet<V>, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
@@ -568,7 +571,7 @@ pub trait Wrapper<'a> {
         self
     }
 
-    fn in_field<V>(mut self, field: &'a str, values: Vec<V>) -> Self
+    fn in_field<V>(mut self, field: &'a str, values: HashSet<V>) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -581,7 +584,7 @@ pub trait Wrapper<'a> {
         self
     }
 
-    fn in_field_flag<V>(mut self, field: &'a str, values: Vec<V>, flag: bool) -> Self
+    fn in_field_flag<V>(mut self, field: &'a str, values: HashSet<V>, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -592,7 +595,52 @@ pub trait Wrapper<'a> {
         self
     }
 
-    fn not_in<F, V>(self, field_func: F, values: Vec<V>) -> Self
+    fn in_vec<F, V>(self, field_func: F, values: Vec<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Copy,
+        Self: Sized,
+    {
+        self.in_vec_field(field_func().0, values)
+    }
+
+    fn in_vec_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Copy,
+        Self: Sized,
+    {
+        if flag {
+            self = self.in_vec(field_func, values);
+        }
+        self
+    }
+
+    fn in_vec_field<V>(mut self, field: &'a str, values: Vec<V>) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+        Self: Sized,
+    {
+        self.wheres_push(Where::new(
+            field,
+            Relationship::In,
+            values.iter().map(|&v| v.into()).collect::<Vec<_>>(),
+        ));
+        self
+    }
+
+    fn in_vec_field_flag<V>(mut self, field: &'a str, values: Vec<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+        Self: Sized,
+    {
+        if flag {
+            self = self.in_vec_field(field, values);
+        }
+        self
+    }
+
+    fn not_in<F, V>(self, field_func: F, values: HashSet<V>) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
@@ -601,7 +649,7 @@ pub trait Wrapper<'a> {
         self.not_in_field(field_func().0, values)
     }
 
-    fn not_in_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
+    fn not_in_flag<F, V>(mut self, field_func: F, values: HashSet<V>, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
@@ -613,7 +661,7 @@ pub trait Wrapper<'a> {
         self
     }
 
-    fn not_in_field<V>(mut self, field: &'a str, values: Vec<V>) -> Self
+    fn not_in_field<V>(mut self, field: &'a str, values: HashSet<V>) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
@@ -626,13 +674,58 @@ pub trait Wrapper<'a> {
         self
     }
 
-    fn not_in_field_flag<V>(mut self, field: &'a str, values: Vec<V>, flag: bool) -> Self
+    fn not_in_field_flag<V>(mut self, field: &'a str, values: HashSet<V>, flag: bool) -> Self
     where
         V: Into<SqlValue> + Copy,
         Self: Sized,
     {
         if flag {
             self = self.not_in_field(field, values);
+        }
+        self
+    }
+
+    fn not_in_vec<F, V>(self, field_func: F, values: Vec<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Copy,
+        Self: Sized,
+    {
+        self.not_in_vec_field(field_func().0, values)
+    }
+
+    fn not_in_vec_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Copy,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_in_vec(field_func, values);
+        }
+        self
+    }
+
+    fn not_in_vec_field<V>(mut self, field: &'a str, values: Vec<V>) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+        Self: Sized,
+    {
+        self.wheres_push(Where::new(
+            field,
+            Relationship::NotIn,
+            values.iter().map(|&v| v.into()).collect::<Vec<_>>(),
+        ));
+        self
+    }
+
+    fn not_in_vec_field_flag<V>(mut self, field: &'a str, values: Vec<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_in_vec_field(field, values);
         }
         self
     }
@@ -821,11 +914,10 @@ pub trait Wrapper<'a> {
         let bracket = self.bracket();
         let r#where = &wheres[0];
         where_sql += &format!(" WHERE {}", r#where.to_bind_sql());
-        for i in 1..wheres.len() {
+        for (i, r#where) in wheres.iter().enumerate().skip(1) {
             for _ in 0..bracket.dec_all_right(i) {
                 where_sql += ")";
             }
-            let r#where = &wheres[i];
             where_sql += if self.or_index().contains(&i) {
                 " OR "
             } else {
@@ -854,27 +946,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         for r#where in self.wheres() {
-            for value in &r#where.values {
-                query = match value {
-                    SqlValue::ISize(value) => query.bind(*value as i64),
-                    SqlValue::USize(value) => query.bind(*value as u64),
-                    SqlValue::I8(value) => query.bind(*value),
-                    SqlValue::U8(value) => query.bind(*value),
-                    SqlValue::I16(value) => query.bind(*value),
-                    SqlValue::U16(value) => query.bind(*value),
-                    SqlValue::I32(value) => query.bind(*value),
-                    SqlValue::U32(value) => query.bind(*value),
-                    SqlValue::I64(value) => query.bind(*value),
-                    SqlValue::U64(value) => query.bind(*value),
-                    SqlValue::F32(value) => query.bind(*value),
-                    SqlValue::F64(value) => query.bind(*value),
-                    SqlValue::Bool(value) => query.bind(*value),
-                    SqlValue::Str(value) => query.bind(value.clone()),
-                    SqlValue::Time(value) => query.bind(*value),
-                    SqlValue::Date(value) => query.bind(*value),
-                    SqlValue::DateTime(value) => query.bind(*value),
-                }
-            }
+            query = bind_query(query, &r#where.values);
         }
         query
     }
@@ -887,27 +959,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         for r#where in self.wheres() {
-            for value in &r#where.values {
-                query_as = match value {
-                    SqlValue::ISize(value) => query_as.bind(*value as i64),
-                    SqlValue::USize(value) => query_as.bind(*value as u64),
-                    SqlValue::I8(value) => query_as.bind(*value),
-                    SqlValue::U8(value) => query_as.bind(*value),
-                    SqlValue::I16(value) => query_as.bind(*value),
-                    SqlValue::U16(value) => query_as.bind(*value),
-                    SqlValue::I32(value) => query_as.bind(*value),
-                    SqlValue::U32(value) => query_as.bind(*value),
-                    SqlValue::I64(value) => query_as.bind(*value),
-                    SqlValue::U64(value) => query_as.bind(*value),
-                    SqlValue::F32(value) => query_as.bind(*value),
-                    SqlValue::F64(value) => query_as.bind(*value),
-                    SqlValue::Bool(value) => query_as.bind(*value),
-                    SqlValue::Str(value) => query_as.bind(value.clone()),
-                    SqlValue::Time(value) => query_as.bind(*value),
-                    SqlValue::Date(value) => query_as.bind(*value),
-                    SqlValue::DateTime(value) => query_as.bind(*value),
-                }
-            }
+            query_as = bind_query_as(query_as, &r#where.values);
         }
         query_as
     }
@@ -920,32 +972,13 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         for r#where in self.wheres() {
-            for value in &r#where.values {
-                query_scalar = match value {
-                    SqlValue::ISize(value) => query_scalar.bind(*value as i64),
-                    SqlValue::USize(value) => query_scalar.bind(*value as u64),
-                    SqlValue::I8(value) => query_scalar.bind(*value),
-                    SqlValue::U8(value) => query_scalar.bind(*value),
-                    SqlValue::I16(value) => query_scalar.bind(*value),
-                    SqlValue::U16(value) => query_scalar.bind(*value),
-                    SqlValue::I32(value) => query_scalar.bind(*value),
-                    SqlValue::U32(value) => query_scalar.bind(*value),
-                    SqlValue::I64(value) => query_scalar.bind(*value),
-                    SqlValue::U64(value) => query_scalar.bind(*value),
-                    SqlValue::F32(value) => query_scalar.bind(*value),
-                    SqlValue::F64(value) => query_scalar.bind(*value),
-                    SqlValue::Bool(value) => query_scalar.bind(*value),
-                    SqlValue::Str(value) => query_scalar.bind(value.clone()),
-                    SqlValue::Time(value) => query_scalar.bind(*value),
-                    SqlValue::Date(value) => query_scalar.bind(*value),
-                    SqlValue::DateTime(value) => query_scalar.bind(*value),
-                }
-            }
+            query_scalar = bind_query_scalar(query_scalar, &r#where.values);
         }
         query_scalar
     }
 }
 
+#[derive(Debug)]
 pub struct Where<'a> {
     field: &'a str,
     relationship: Relationship,
@@ -1074,7 +1107,7 @@ impl<'a> Order<'a> {
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 enum Relationship {
     // ==
     Eq,
@@ -1131,7 +1164,9 @@ impl Relationship {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum SqlValue {
+    Null,
     ISize(isize),
     USize(usize),
     I8(i8),

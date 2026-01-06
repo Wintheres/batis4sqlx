@@ -1,9 +1,10 @@
 use crate::Result;
+use crate::repository::bind_query;
 use crate::wrapper::{Bracket, GroupHaving, Order, SqlValue, Where, Wrapper};
 use crate::{Entity, LambdaField};
 use sqlx::mysql::MySqlRow;
 use sqlx::{FromRow, MySql, MySqlPool};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::marker::PhantomData;
 
 pub struct QueryWrapper<'a, 'd, E>
@@ -305,7 +306,8 @@ pub struct UpdateWrapper<'a, 'd, E>
 where
     E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin,
 {
-    set: HashMap<&'a str, SqlValue>,
+    set_key: Vec<&'a str>,
+    set_value: Vec<SqlValue>,
     wheres: Vec<Where<'a>>,
     or_index: HashSet<usize>,
     bracket: Bracket,
@@ -319,7 +321,8 @@ where
 impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWrapper<'a, 'd, E> {
     pub fn new(db: &'d MySqlPool) -> Self {
         Self {
-            set: HashMap::new(),
+            set_key: Vec::new(),
+            set_value: Vec::new(),
             wheres: vec![],
             or_index: HashSet::new(),
             bracket: Bracket::new(),
@@ -331,11 +334,39 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
         }
     }
 
-    pub fn set<V>(mut self, field: &'a str, value: V) -> Self
+    pub fn set<V>(self, field: LambdaField<'a>, value: V) -> Self
     where
         V: Into<SqlValue> + Copy,
     {
-        self.set.insert(field, value.into());
+        self.set_field(*field, value)
+    }
+
+    pub fn set_flag<V>(mut self, field: LambdaField<'a>, value: V, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+    {
+        if flag {
+            self = self.set(field, value);
+        }
+        self
+    }
+
+    pub fn set_field<V>(mut self, field: &'a str, value: V) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+    {
+        self.set_key.push(field);
+        self.set_value.push(value.into());
+        self
+    }
+
+    pub fn set_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Copy,
+    {
+        if flag {
+            self = self.set_field(field, value);
+        }
         self
     }
 
@@ -347,9 +378,9 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
         }
         sql += &format!("UPDATE {} SET ", E::table_name());
         sql += self
-            .set
+            .set_key
             .iter()
-            .map(|(key, _value)| format!("{key} = ?"))
+            .map(|key| format!("{key} = ?"))
             .collect::<Vec<_>>()
             .join(", ")
             .as_str();
@@ -365,8 +396,13 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
 
     pub async fn execute(mut self) -> Result<u64> {
         let sql = self.sql();
+        let values = self
+            .set_value
+            .iter()
+            .map(|value| value.clone())
+            .collect::<Vec<_>>();
         Ok(self
-            .bind_query(sqlx::query(&sql))
+            .bind_query(bind_query(sqlx::query(&sql), &values))
             .execute(self.db)
             .await?
             .rows_affected())
