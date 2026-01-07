@@ -57,7 +57,7 @@ pub trait ServiceImpl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send +
             .opt()
     }
 
-    fn list(&'d self) -> impl Future<Output = Result<Vec<E>>> {
+    fn vec(&'d self) -> impl Future<Output = Result<Vec<E>>> {
         self.lambda_query().vec()
     }
 }

@@ -334,19 +334,21 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
         }
     }
 
-    pub fn set<V>(self, field: LambdaField<'a>, value: V) -> Self
+    pub fn set<F, V>(self, field_func: F, value: V) -> Self
     where
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
     {
-        self.set_field(*field, value)
+        self.set_field(*field_func(), value)
     }
 
-    pub fn set_flag<V>(mut self, field: LambdaField<'a>, value: V, flag: bool) -> Self
+    pub fn set_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
+        F: FnOnce() -> LambdaField<'a>,
         V: Into<SqlValue> + Copy,
     {
         if flag {
-            self = self.set(field, value);
+            self = self.set(field_func, value);
         }
         self
     }
