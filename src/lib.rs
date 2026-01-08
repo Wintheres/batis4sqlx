@@ -43,8 +43,8 @@ pub trait ServiceImpl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send +
         chain::UpdateWrapper::<E>::new(self.borrow_db())
     }
 
-    fn lambda_delete(&'d self) -> chain::RemoveWrapper<'a, 'd, E> {
-        chain::RemoveWrapper::<E>::new(self.borrow_db())
+    fn lambda_delete(&'d self) -> chain::DeleteWrapper<'a, 'd, E> {
+        chain::DeleteWrapper::<E>::new(self.borrow_db())
     }
 
     fn get_by_primary_key<K>(&'d self, primary_key: K) -> impl Future<Output = Result<Option<E>>>

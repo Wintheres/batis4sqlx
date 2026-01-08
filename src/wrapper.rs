@@ -24,7 +24,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.eq_field(field_func().0, value)
+        self.eq_field(*field_func(), value)
     }
 
     fn eq_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -46,7 +46,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.eq_field(field_func().0, value)
+            self = self.eq_field(*field_func(), value)
         }
         self
     }
@@ -111,7 +111,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.ne_field(field_func().0, value)
+        self.ne_field(*field_func(), value)
     }
 
     fn ne_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -133,7 +133,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.ne_field(field_func().0, value);
+            self = self.ne_field(*field_func(), value);
         }
         self
     }
@@ -198,7 +198,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.gt_field(field_func().0, value)
+        self.gt_field(*field_func(), value)
     }
 
     fn gt_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -220,7 +220,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.gt_field(field_func().0, value);
+            self = self.gt_field(*field_func(), value);
         }
         self
     }
@@ -285,7 +285,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.ge_field(field_func().0, value)
+        self.ge_field(*field_func(), value)
     }
 
     fn ge_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -307,7 +307,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.ge_field(field_func().0, value);
+            self = self.ge_field(*field_func(), value);
         }
         self
     }
@@ -372,7 +372,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.lt_field(field_func().0, value)
+        self.lt_field(*field_func(), value)
     }
 
     fn lt_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -394,7 +394,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.lt_field(field_func().0, value);
+            self = self.lt_field(*field_func(), value);
         }
         self
     }
@@ -459,7 +459,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.le_field(field_func().0, value)
+        self.le_field(*field_func(), value)
     }
 
     fn le_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -481,7 +481,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.le_field(field_func().0, value);
+            self = self.le_field(*field_func(), value);
         }
         self
     }
@@ -546,7 +546,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.between_field(field_func().0, value_left, value_right)
+        self.between_field(*field_func(), value_left, value_right)
     }
 
     fn between_flag<F, V>(
@@ -581,7 +581,7 @@ pub trait Wrapper<'a> {
         if let Some(value_left) = value_left
             && let Some(value_right) = value_right
         {
-            self = self.between_field(field_func().0, value_left, value_right);
+            self = self.between_field(*field_func(), value_left, value_right);
         }
         self
     }
@@ -675,7 +675,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.not_between_field(field_func().0, value_left, value_right)
+        self.not_between_field(*field_func(), value_left, value_right)
     }
 
     fn not_between_flag<F, V>(
@@ -710,7 +710,7 @@ pub trait Wrapper<'a> {
         if let Some(value_left) = value_left
             && let Some(value_right) = value_right
         {
-            self = self.not_between_field(field_func().0, value_left, value_right);
+            self = self.not_between_field(*field_func(), value_left, value_right);
         }
         self
     }
@@ -804,7 +804,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.like_field(field_func().0, value)
+        self.like_field(*field_func(), value)
     }
 
     fn like_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -826,7 +826,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.like_field(field_func().0, value);
+            self = self.like_field(*field_func(), value);
         }
         self
     }
@@ -891,7 +891,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.not_like_field(field_func().0, value)
+        self.not_like_field(*field_func(), value)
     }
 
     fn not_like_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -913,7 +913,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.not_like_field(field_func().0, value);
+            self = self.not_like_field(*field_func(), value);
         }
         self
     }
@@ -978,7 +978,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.like_left_field(field_func().0, value)
+        self.like_left_field(*field_func(), value)
     }
 
     fn like_left_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -1000,7 +1000,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.like_left_field(field_func().0, value);
+            self = self.like_left_field(*field_func(), value);
         }
         self
     }
@@ -1069,7 +1069,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.like_right_field(field_func().0, value)
+        self.like_right_field(*field_func(), value)
     }
 
     fn like_right_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
@@ -1091,7 +1091,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(value) = value {
-            self = self.like_right_field(field_func().0, value);
+            self = self.like_right_field(*field_func(), value);
         }
         self
     }
@@ -1160,7 +1160,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.in_field(field_func().0, values)
+        self.in_field(*field_func(), values)
     }
 
     fn in_flag<F, V>(mut self, field_func: F, values: HashSet<V>, flag: bool) -> Self
@@ -1182,7 +1182,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(values) = values {
-            self = self.in_field(field_func().0, values);
+            self = self.in_field(*field_func(), values);
         }
         self
     }
@@ -1256,7 +1256,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.in_vec_field(field_func().0, values)
+        self.in_vec_field(*field_func(), values)
     }
 
     fn in_vec_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
@@ -1278,7 +1278,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(values) = values {
-            self = self.in_vec_field(field_func().0, values);
+            self = self.in_vec_field(*field_func(), values);
         }
         self
     }
@@ -1352,7 +1352,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.not_in_field(field_func().0, values)
+        self.not_in_field(*field_func(), values)
     }
 
     fn not_in_flag<F, V>(mut self, field_func: F, values: HashSet<V>, flag: bool) -> Self
@@ -1374,7 +1374,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(values) = values {
-            self = self.not_in_field(field_func().0, values);
+            self = self.not_in_field(*field_func(), values);
         }
         self
     }
@@ -1453,7 +1453,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.not_in_vec_field(field_func().0, values)
+        self.not_in_vec_field(*field_func(), values)
     }
 
     fn not_in_vec_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
@@ -1475,7 +1475,7 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if let Some(values) = values {
-            self = self.not_in_vec_field(field_func().0, values);
+            self = self.not_in_vec_field(*field_func(), values);
         }
         self
     }
@@ -1554,7 +1554,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.null_field::<V>(field_func().0)
+        self.null_field::<V>(*field_func())
     }
 
     fn null_flag<F, V>(mut self, field_func: F, flag: bool) -> Self
@@ -1595,7 +1595,7 @@ pub trait Wrapper<'a> {
         V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.not_null_field::<V>(field_func().0)
+        self.not_null_field::<V>(*field_func())
     }
 
     fn not_null_flag<F, V>(mut self, field_func: F, flag: bool) -> Self

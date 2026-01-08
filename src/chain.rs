@@ -113,6 +113,31 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
         self
     }
 
+    pub fn having_values_opt<V>(mut self, having_sql: &'a str, values: Option<Vec<V>>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+    {
+        if let Some(values) = values {
+            self = self.having_values(having_sql, values);
+        }
+        self
+    }
+
+    pub fn having_values_opt_flag<V>(
+        mut self,
+        having_sql: &'a str,
+        values: Option<Vec<V>>,
+        flag: bool,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+    {
+        if flag {
+            self = self.having_values_opt(having_sql, values);
+        }
+        self
+    }
+
     pub fn order_asc<F>(self, field_func: F) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
@@ -353,6 +378,28 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
         self
     }
 
+    pub fn set_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+    {
+        if let Some(value) = value {
+            self = self.set_field(*field_func(), value);
+        }
+        self
+    }
+
+    pub fn set_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+    {
+        if flag {
+            self = self.set_opt(field_func, value);
+        }
+        self
+    }
+
     pub fn set_field<V>(mut self, field: &'a str, value: V) -> Self
     where
         V: Into<SqlValue> + Clone,
@@ -368,6 +415,26 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
     {
         if flag {
             self = self.set_field(field, value);
+        }
+        self
+    }
+
+    pub fn set_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+    {
+        if let Some(value) = value {
+            self = self.set_field(field, value);
+        }
+        self
+    }
+
+    pub fn set_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+    {
+        if flag {
+            self = self.set_field_opt(field, value);
         }
         self
     }
@@ -463,7 +530,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'
     }
 }
 
-pub struct RemoveWrapper<'a, 'd, E>
+pub struct DeleteWrapper<'a, 'd, E>
 where
     E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin,
 {
@@ -477,7 +544,7 @@ where
     _ignore: PhantomData<E>,
 }
 
-impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> RemoveWrapper<'a, 'd, E> {
+impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> DeleteWrapper<'a, 'd, E> {
     pub fn new(db: &'d MySqlPool) -> Self {
         Self {
             wheres: vec![],
@@ -519,7 +586,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> RemoveWra
 }
 
 impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'a>
-    for RemoveWrapper<'a, 'd, E>
+    for DeleteWrapper<'a, 'd, E>
 {
     fn wheres(&self) -> &Vec<Where<'a>> {
         &self.wheres
