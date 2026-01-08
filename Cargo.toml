@@ -1,6 +1,6 @@
 [package]
 name = "batis4sqlx"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 
 authors = ["W <w793981522@qq.com>"]

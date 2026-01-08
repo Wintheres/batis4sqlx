@@ -93,7 +93,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
 
     pub fn having_values<V>(mut self, having_sql: &'a str, values: Vec<V>) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
     {
         let group_having = &mut self.group_having;
         group_having.having(having_sql);
@@ -105,7 +105,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
 
     pub fn having_values_flag<V>(mut self, having_sql: &'a str, values: Vec<V>, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
     {
         if flag {
             self = self.having_values(having_sql, values);
@@ -337,7 +337,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
     pub fn set<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
     {
         self.set_field(*field_func(), value)
     }
@@ -345,7 +345,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
     pub fn set_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
     {
         if flag {
             self = self.set(field_func, value);
@@ -355,7 +355,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
 
     pub fn set_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
     {
         self.set_key.push(field);
         self.set_value.push(value.into());
@@ -364,7 +364,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
 
     pub fn set_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
     {
         if flag {
             self = self.set_field(field, value);

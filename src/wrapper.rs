@@ -21,7 +21,7 @@ pub trait Wrapper<'a> {
     fn eq<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.eq_field(field_func().0, value)
@@ -30,7 +30,7 @@ pub trait Wrapper<'a> {
     fn eq_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -39,9 +39,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn eq_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.eq_field(field_func().0, value)
+        }
+        self
+    }
+
+    fn eq_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.eq_opt(field_func, value);
+        }
+        self
+    }
+
     fn eq_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::Eq, vec![value.into()]));
@@ -50,7 +74,7 @@ pub trait Wrapper<'a> {
 
     fn eq_field_flag<F, V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -59,10 +83,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn eq_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.eq_field(field, value);
+        }
+        self
+    }
+
+    fn eq_field_opt_flag<F, V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.eq_field_opt(field, value);
+        }
+        self
+    }
+
     fn ne<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.ne_field(field_func().0, value)
@@ -71,7 +117,7 @@ pub trait Wrapper<'a> {
     fn ne_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -80,9 +126,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn ne_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.ne_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn ne_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.ne_opt(field_func, value);
+        }
+        self
+    }
+
     fn ne_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::Ne, vec![value.into()]));
@@ -91,7 +161,7 @@ pub trait Wrapper<'a> {
 
     fn ne_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -100,10 +170,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn ne_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.ne_field(field, value);
+        }
+        self
+    }
+
+    fn ne_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.ne_field_opt(field, value);
+        }
+        self
+    }
+
     fn gt<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.gt_field(field_func().0, value)
@@ -112,7 +204,7 @@ pub trait Wrapper<'a> {
     fn gt_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -121,9 +213,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn gt_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.gt_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn gt_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.gt_opt(field_func, value);
+        }
+        self
+    }
+
     fn gt_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::Gt, vec![value.into()]));
@@ -132,7 +248,7 @@ pub trait Wrapper<'a> {
 
     fn gt_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -141,10 +257,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn gt_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.gt_field(field, value);
+        }
+        self
+    }
+
+    fn gt_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.gt_field_opt(field, value);
+        }
+        self
+    }
+
     fn ge<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.ge_field(field_func().0, value)
@@ -153,7 +291,7 @@ pub trait Wrapper<'a> {
     fn ge_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -162,9 +300,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn ge_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.ge_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn ge_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.ge_opt(field_func, value);
+        }
+        self
+    }
+
     fn ge_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::Ge, vec![value.into()]));
@@ -173,7 +335,7 @@ pub trait Wrapper<'a> {
 
     fn ge_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -182,10 +344,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn ge_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.ge_field(field, value);
+        }
+        self
+    }
+
+    fn ge_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.ge_field_opt(field, value);
+        }
+        self
+    }
+
     fn lt<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.lt_field(field_func().0, value)
@@ -194,7 +378,7 @@ pub trait Wrapper<'a> {
     fn lt_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -203,9 +387,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn lt_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.lt_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn lt_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.lt_opt(field_func, value);
+        }
+        self
+    }
+
     fn lt_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::Lt, vec![value.into()]));
@@ -214,7 +422,7 @@ pub trait Wrapper<'a> {
 
     fn lt_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -223,10 +431,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn lt_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.lt_field(field, value);
+        }
+        self
+    }
+
+    fn lt_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.lt_field_opt(field, value);
+        }
+        self
+    }
+
     fn le<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.le_field(field_func().0, value)
@@ -235,7 +465,7 @@ pub trait Wrapper<'a> {
     fn le_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -244,9 +474,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn le_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.le_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn le_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.le_opt(field_func, value);
+        }
+        self
+    }
+
     fn le_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::Le, vec![value.into()]));
@@ -255,7 +509,7 @@ pub trait Wrapper<'a> {
 
     fn le_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -264,10 +518,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn le_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.le_field(field, value);
+        }
+        self
+    }
+
+    fn le_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.le_field_opt(field, value);
+        }
+        self
+    }
+
     fn between<F, V>(self, field_func: F, value_left: V, value_right: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.between_field(field_func().0, value_left, value_right)
@@ -282,7 +558,7 @@ pub trait Wrapper<'a> {
     ) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -291,9 +567,46 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn between_opt<F, V>(
+        mut self,
+        field_func: F,
+        value_left: Option<V>,
+        value_right: Option<V>,
+    ) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value_left) = value_left
+            && let Some(value_right) = value_right
+        {
+            self = self.between_field(field_func().0, value_left, value_right);
+        }
+        self
+    }
+
+    fn between_opt_flag<F, V>(
+        mut self,
+        field_func: F,
+        value_left: Option<V>,
+        value_right: Option<V>,
+        flag: bool,
+    ) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.between_opt(field_func, value_left, value_right);
+        }
+        self
+    }
+
     fn between_field<V>(mut self, field: &'a str, value_left: V, value_right: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(
@@ -312,7 +625,7 @@ pub trait Wrapper<'a> {
         flag: bool,
     ) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -321,10 +634,45 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn between_field_opt<V>(
+        mut self,
+        field: &'a str,
+        value_left: Option<V>,
+        value_right: Option<V>,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value_left) = value_left
+            && let Some(value_right) = value_right
+        {
+            self = self.between_field(field, value_left, value_right);
+        }
+        self
+    }
+
+    fn between_field_opt_flag<V>(
+        mut self,
+        field: &'a str,
+        value_left: Option<V>,
+        value_right: Option<V>,
+        flag: bool,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.between_field_opt(field, value_left, value_right);
+        }
+        self
+    }
+
     fn not_between<F, V>(self, field_func: F, value_left: V, value_right: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.not_between_field(field_func().0, value_left, value_right)
@@ -339,7 +687,7 @@ pub trait Wrapper<'a> {
     ) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -348,9 +696,46 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_between_opt<F, V>(
+        mut self,
+        field_func: F,
+        value_left: Option<V>,
+        value_right: Option<V>,
+    ) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value_left) = value_left
+            && let Some(value_right) = value_right
+        {
+            self = self.not_between_field(field_func().0, value_left, value_right);
+        }
+        self
+    }
+
+    fn not_between_opt_flag<F, V>(
+        mut self,
+        field_func: F,
+        value_left: Option<V>,
+        value_right: Option<V>,
+        flag: bool,
+    ) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_between_opt(field_func, value_left, value_right);
+        }
+        self
+    }
+
     fn not_between_field<V>(mut self, field: &'a str, value_left: V, value_right: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(
@@ -369,7 +754,7 @@ pub trait Wrapper<'a> {
         flag: bool,
     ) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -378,10 +763,45 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_between_field_opt<V>(
+        mut self,
+        field: &'a str,
+        value_left: Option<V>,
+        value_right: Option<V>,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value_left) = value_left
+            && let Some(value_right) = value_right
+        {
+            self = self.not_between_field(field, value_left, value_right);
+        }
+        self
+    }
+
+    fn not_between_field_opt_flag<V>(
+        mut self,
+        field: &'a str,
+        value_left: Option<V>,
+        value_right: Option<V>,
+        flag: bool,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_between_field_opt(field, value_left, value_right);
+        }
+        self
+    }
+
     fn like<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.like_field(field_func().0, value)
@@ -390,7 +810,7 @@ pub trait Wrapper<'a> {
     fn like_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -399,9 +819,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn like_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.like_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn like_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.like_opt(field_func, value);
+        }
+        self
+    }
+
     fn like_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::Like, vec![value.into()]));
@@ -410,7 +854,7 @@ pub trait Wrapper<'a> {
 
     fn like_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -419,10 +863,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn like_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.like_field(field, value);
+        }
+        self
+    }
+
+    fn like_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.like_field_opt(field, value);
+        }
+        self
+    }
+
     fn not_like<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.not_like_field(field_func().0, value)
@@ -431,7 +897,7 @@ pub trait Wrapper<'a> {
     fn not_like_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -440,9 +906,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_like_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.not_like_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn not_like_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_opt(field_func, value);
+        }
+        self
+    }
+
     fn not_like_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::NotLike, vec![value.into()]));
@@ -451,7 +941,7 @@ pub trait Wrapper<'a> {
 
     fn not_like_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -460,10 +950,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_like_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.not_like_field(field, value);
+        }
+        self
+    }
+
+    fn not_like_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_field_opt(field, value);
+        }
+        self
+    }
+
     fn like_left<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.like_left_field(field_func().0, value)
@@ -472,7 +984,7 @@ pub trait Wrapper<'a> {
     fn like_left_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -481,9 +993,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn like_left_pot<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.like_left_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn like_left_pot_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.like_left_pot(field_func, value);
+        }
+        self
+    }
+
     fn like_left_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(
@@ -496,7 +1032,7 @@ pub trait Wrapper<'a> {
 
     fn like_left_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -505,10 +1041,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn like_left_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.like_left_field(field, value);
+        }
+        self
+    }
+
+    fn like_left_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.like_left_field_opt(field, value);
+        }
+        self
+    }
+
     fn like_right<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.like_right_field(field_func().0, value)
@@ -517,7 +1075,7 @@ pub trait Wrapper<'a> {
     fn like_right_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -526,9 +1084,33 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn like_right_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.like_right_field(field_func().0, value);
+        }
+        self
+    }
+
+    fn like_right_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.like_right_opt(field_func, value);
+        }
+        self
+    }
+
     fn like_right_field<V>(mut self, field: &'a str, value: V) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(
@@ -541,7 +1123,7 @@ pub trait Wrapper<'a> {
 
     fn like_right_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -550,10 +1132,32 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn like_right_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.like_right_field(field, value);
+        }
+        self
+    }
+
+    fn like_right_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.like_right_field_opt(field, value);
+        }
+        self
+    }
+
     fn r#in<F, V>(self, field_func: F, values: HashSet<V>) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.in_field(field_func().0, values)
@@ -562,7 +1166,7 @@ pub trait Wrapper<'a> {
     fn in_flag<F, V>(mut self, field_func: F, values: HashSet<V>, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -571,22 +1175,46 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn in_opt<F, V>(mut self, field_func: F, values: Option<HashSet<V>>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(values) = values {
+            self = self.in_field(field_func().0, values);
+        }
+        self
+    }
+
+    fn in_opt_flag<F, V>(mut self, field_func: F, values: Option<HashSet<V>>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.in_opt(field_func, values);
+        }
+        self
+    }
+
     fn in_field<V>(mut self, field: &'a str, values: HashSet<V>) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(
             field,
             Relationship::In,
-            values.iter().map(|&v| v.into()).collect::<Vec<_>>(),
+            values.iter().map(|v| v.clone().into()).collect::<Vec<_>>(),
         ));
         self
     }
 
     fn in_field_flag<V>(mut self, field: &'a str, values: HashSet<V>, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -595,10 +1223,37 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn in_field_opt<V>(mut self, field: &'a str, values: Option<HashSet<V>>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(values) = values {
+            self = self.in_field(field, values);
+        }
+        self
+    }
+
+    fn in_field_opt_flag<V>(
+        mut self,
+        field: &'a str,
+        values: Option<HashSet<V>>,
+        flag: bool,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.in_field_opt(field, values);
+        }
+        self
+    }
+
     fn in_vec<F, V>(self, field_func: F, values: Vec<V>) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.in_vec_field(field_func().0, values)
@@ -607,7 +1262,7 @@ pub trait Wrapper<'a> {
     fn in_vec_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -616,22 +1271,46 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn in_vec_opt<F, V>(mut self, field_func: F, values: Option<Vec<V>>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(values) = values {
+            self = self.in_vec_field(field_func().0, values);
+        }
+        self
+    }
+
+    fn in_vec_opt_flag<F, V>(mut self, field_func: F, values: Option<Vec<V>>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.in_vec_opt(field_func, values);
+        }
+        self
+    }
+
     fn in_vec_field<V>(mut self, field: &'a str, values: Vec<V>) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(
             field,
             Relationship::In,
-            values.iter().map(|&v| v.into()).collect::<Vec<_>>(),
+            values.iter().map(|v| v.clone().into()).collect::<Vec<_>>(),
         ));
         self
     }
 
     fn in_vec_field_flag<V>(mut self, field: &'a str, values: Vec<V>, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -640,10 +1319,37 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn in_vec_field_opt<V>(mut self, field: &'a str, values: Option<Vec<V>>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(values) = values {
+            self = self.in_vec_field(field, values);
+        }
+        self
+    }
+
+    fn in_vec_field_opt_flag<V>(
+        mut self,
+        field: &'a str,
+        values: Option<Vec<V>>,
+        flag: bool,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.in_vec_field_opt(field, values);
+        }
+        self
+    }
+
     fn not_in<F, V>(self, field_func: F, values: HashSet<V>) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.not_in_field(field_func().0, values)
@@ -652,7 +1358,7 @@ pub trait Wrapper<'a> {
     fn not_in_flag<F, V>(mut self, field_func: F, values: HashSet<V>, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -661,22 +1367,51 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_in_opt<F, V>(mut self, field_func: F, values: Option<HashSet<V>>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(values) = values {
+            self = self.not_in_field(field_func().0, values);
+        }
+        self
+    }
+
+    fn not_in_opt_flag<F, V>(
+        mut self,
+        field_func: F,
+        values: Option<HashSet<V>>,
+        flag: bool,
+    ) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_in_opt(field_func, values);
+        }
+        self
+    }
+
     fn not_in_field<V>(mut self, field: &'a str, values: HashSet<V>) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(
             field,
             Relationship::NotIn,
-            values.iter().map(|&v| v.into()).collect::<Vec<_>>(),
+            values.iter().map(|v| v.clone().into()).collect::<Vec<_>>(),
         ));
         self
     }
 
     fn not_in_field_flag<V>(mut self, field: &'a str, values: HashSet<V>, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -685,10 +1420,37 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_in_field_opt<V>(mut self, field: &'a str, values: Option<HashSet<V>>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(values) = values {
+            self = self.not_in_field(field, values);
+        }
+        self
+    }
+
+    fn not_in_opt_field_flag<V>(
+        mut self,
+        field: &'a str,
+        values: Option<HashSet<V>>,
+        flag: bool,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_in_field_opt(field, values);
+        }
+        self
+    }
+
     fn not_in_vec<F, V>(self, field_func: F, values: Vec<V>) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.not_in_vec_field(field_func().0, values)
@@ -697,7 +1459,7 @@ pub trait Wrapper<'a> {
     fn not_in_vec_flag<F, V>(mut self, field_func: F, values: Vec<V>, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -706,22 +1468,51 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_in_vec_opt<F, V>(mut self, field_func: F, values: Option<Vec<V>>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(values) = values {
+            self = self.not_in_vec_field(field_func().0, values);
+        }
+        self
+    }
+
+    fn not_in_vec_opt_flag<F, V>(
+        mut self,
+        field_func: F,
+        values: Option<Vec<V>>,
+        flag: bool,
+    ) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_in_vec_opt(field_func, values);
+        }
+        self
+    }
+
     fn not_in_vec_field<V>(mut self, field: &'a str, values: Vec<V>) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(
             field,
             Relationship::NotIn,
-            values.iter().map(|&v| v.into()).collect::<Vec<_>>(),
+            values.iter().map(|v| v.clone().into()).collect::<Vec<_>>(),
         ));
         self
     }
 
     fn not_in_vec_field_flag<V>(mut self, field: &'a str, values: Vec<V>, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -730,10 +1521,37 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_in_vec_field_opt<V>(mut self, field: &'a str, values: Option<Vec<V>>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(values) = values {
+            self = self.not_in_vec_field(field, values);
+        }
+        self
+    }
+
+    fn not_in_vec_field_opt_flag<V>(
+        mut self,
+        field: &'a str,
+        values: Option<Vec<V>>,
+        flag: bool,
+    ) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_in_vec_field_opt(field, values);
+        }
+        self
+    }
+
     fn null<F, V>(self, field_func: F) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.null_field::<V>(field_func().0)
@@ -742,7 +1560,7 @@ pub trait Wrapper<'a> {
     fn null_flag<F, V>(mut self, field_func: F, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -753,7 +1571,7 @@ pub trait Wrapper<'a> {
 
     fn null_field<V>(mut self, field: &'a str) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::IsNull, vec![]));
@@ -762,7 +1580,7 @@ pub trait Wrapper<'a> {
 
     fn null_field_flag<V>(mut self, field: &'a str, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -774,7 +1592,7 @@ pub trait Wrapper<'a> {
     fn not_null<F, V>(self, field_func: F) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.not_null_field::<V>(field_func().0)
@@ -783,7 +1601,7 @@ pub trait Wrapper<'a> {
     fn not_null_flag<F, V>(mut self, field_func: F, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
@@ -794,7 +1612,7 @@ pub trait Wrapper<'a> {
 
     fn not_null_field<V>(mut self, field: &'a str) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::IsNotNull, vec![]));
@@ -803,7 +1621,7 @@ pub trait Wrapper<'a> {
 
     fn not_null_field_flag<V>(mut self, field: &'a str, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Copy,
+        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {

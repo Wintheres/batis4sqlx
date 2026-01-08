@@ -138,7 +138,10 @@ impl<'a, 'd> ServiceImpl<'a, 'd, User> for UserService {
      let user_opt = user_service
          .lambda_query()
          .eq(User::id_field, 1)
-         .eq(User::username_field, "admin")
+         .eq(User::username_field, "test")
+         .eq_flag(User::id_field, 2, false)
+         .or()
+         .ne_opt(User::username_field, Some("admin"))
          .opt()
          .await
          .unwrap();
@@ -150,7 +153,7 @@ impl<'a, 'd> ServiceImpl<'a, 'd, User> for UserService {
      let rows = user_service
          .lambda_update()
          .eq(User::id_field, 1)
-         .eq(User::username_field, "admin")
+         .eq(User::username_field, "test")
          .set(User::password_field, "123456")
          .execute()
          .await
@@ -161,7 +164,7 @@ impl<'a, 'd> ServiceImpl<'a, 'd, User> for UserService {
      let rows = user_service
          .lambda_delete()
          .eq(User::id_field, 1)
-         .eq(User::username_field, "admin")
+         .eq(User::username_field, "test")
          .execute()
          .await
          .unwrap();
