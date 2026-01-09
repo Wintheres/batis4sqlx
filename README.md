@@ -10,7 +10,7 @@
 
 ```rust
 use batis4sqlx::ServiceImpl;
-use batis4sqlx::batis4sqlx_macros::{entity, repository};
+use batis4sqlx::batis4sqlx_macros::{entity, Entity, repository};
 use batis4sqlx::repository::MySqlRepository;
 use batis4sqlx::wrapper::Wrapper;
 use serde::Serialize;
@@ -24,18 +24,23 @@ use std::rc::Rc;
 ```rust
 /// user struct
 ///
-/// #[entity] has 3 attribute
 /// all table fields need to be wrapped with Option.
+/// #[entity] has 1 attribute
 /// `table_name` used to specify the table name.
-/// `primary_key` used to specify the primary key name.
-/// `ignore_field` used to ignore non-table fields.
-#[derive(Serialize, FromRow, Default, Debug)]
-#[entity(table_name = "user", primary_key = "id", ignore_field = ["ignore"])]
+/// 
+/// #[entity_field] has 3 attribute
+/// `primary_key` used to specify the primary key name. If not used, it will be named "id" by default.
+/// `name` used for field aliases
+/// `skip` used to ignore non-table fields.
+#[entity(table_name = "user")]
+#[derive(Serialize, FromRow, Default, Debug, Entity)]
 struct User {
+    #[entity_field(primary_key, name = "ID")]
     id: Option<u64>,
     username: Option<String>,
+    #[entity_field(name = "pwd")]
     password: Option<String>,
-    #[sqlx(skip)]
+    #[entity_field(skip)]
     ignore: String,
 }
 ```

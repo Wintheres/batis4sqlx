@@ -1,7 +1,9 @@
 pub extern crate batis4sqlx_macros;
+
 use crate::wrapper::{SqlValue, Wrapper};
 use sqlx::mysql::MySqlRow;
 use sqlx::{Error, FromRow, MySqlPool};
+use std::fmt::{Display, Formatter};
 use std::ops::Deref;
 
 pub mod chain;
@@ -13,7 +15,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub trait Entity {
     fn table_name() -> &'static str;
 
-    fn primary_key() -> &'static str;
+    fn primary_key<'b>() -> LambdaField<'b>;
 }
 
 pub struct LambdaField<'a>(&'a str);
@@ -29,6 +31,12 @@ impl<'a> Deref for LambdaField<'a> {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<'a> Display for LambdaField<'a> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -52,7 +60,7 @@ pub trait ServiceImpl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send +
         K: Into<SqlValue> + Copy,
     {
         self.lambda_query()
-            .eq_field(E::primary_key(), primary_key)
+            .eq(E::primary_key, primary_key)
             .last("LIMIT 1")
             .opt()
     }
