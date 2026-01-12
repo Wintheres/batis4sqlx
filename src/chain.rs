@@ -45,7 +45,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
     where
         F: FnOnce() -> LambdaField<'a>,
     {
-        self.group_having.field_push(field_func().0);
+        self.group_having.field_push(*field_func());
         self
     }
 
@@ -64,7 +64,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
         F: FnOnce() -> LambdaField<'a>,
     {
         for field_func in field_func_vec {
-            self.group_having.field_push(field_func().0);
+            self.group_having.field_push(*field_func());
         }
         self
     }
@@ -142,14 +142,14 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
     where
         F: FnOnce() -> LambdaField<'a>,
     {
-        self.order_asc_field(field_func().0)
+        self.order_asc_field(*field_func())
     }
 
     pub fn order_desc<F>(self, field_func: F) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
     {
-        self.order_desc_field(field_func().0)
+        self.order_desc_field(*field_func())
     }
 
     pub fn select<F>(mut self, field_func_vec: Vec<F>) -> Self
@@ -157,7 +157,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
         F: FnOnce() -> LambdaField<'a>,
     {
         for f in field_func_vec {
-            self.field.push(f().0);
+            self.field.push(*f());
         }
         self
     }

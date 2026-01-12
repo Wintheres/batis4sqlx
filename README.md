@@ -12,7 +12,6 @@
 use batis4sqlx::ServiceImpl;
 use batis4sqlx::batis4sqlx_macros::{entity, Entity, repository};
 use batis4sqlx::repository::MySqlRepository;
-use batis4sqlx::wrapper::Wrapper;
 use serde::Serialize;
 use sqlx::{FromRow, MySqlPool};
 use std::collections::HashSet;
@@ -28,18 +27,20 @@ use std::rc::Rc;
 /// #[entity] has 1 attribute
 /// `table_name` used to specify the table name.
 /// 
-/// #[entity_field] has 3 attribute
+/// #[entity_field] has 3 attribute, If there are multiple #[entity_field] in the same field, only the first #[entity_field] will take effect.
 /// `primary_key` used to specify the primary key name. If not used, it will be named "id" by default.
-/// `name` used for field aliases
-/// `skip` used to ignore non-table fields.
+/// `name` used for field aliases.(equivalent to #[sqlx(rename = "alias")])
+/// `skip` used to ignore lambda field function.
 #[entity(table_name = "user")]
 #[derive(Serialize, FromRow, Default, Debug, Entity)]
 struct User {
     #[entity_field(primary_key, name = "ID")]
+    // #[entity_field(skip)] other #[entity_field] invalid.
     id: Option<u64>,
     username: Option<String>,
     #[entity_field(name = "pwd")]
     password: Option<String>,
+    #[sqlx(skip)]
     #[entity_field(skip)]
     ignore: String,
 }
