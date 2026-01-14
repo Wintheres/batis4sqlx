@@ -55,12 +55,12 @@ pub trait ServiceImpl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send +
         chain::DeleteWrapper::<E>::new(self.borrow_db())
     }
 
-    fn get_by_primary_key<K>(&'d self, primary_key: K) -> impl Future<Output = Result<Option<E>>>
+    fn get_by_primary_key<K>(&'d self, primary_key_value: K) -> impl Future<Output = Result<Option<E>>>
     where
-        K: Into<SqlValue> + Copy,
+        K: Into<SqlValue> + Clone,
     {
         self.lambda_query()
-            .eq(E::primary_key, primary_key)
+            .eq(E::primary_key, primary_key_value)
             .last("LIMIT 1")
             .opt()
     }
