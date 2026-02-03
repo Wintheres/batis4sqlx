@@ -34,6 +34,7 @@ pub fn bind_query<'q>(
             SqlValue::Time(value) => query.bind(*value),
             SqlValue::Date(value) => query.bind(*value),
             SqlValue::DateTime(value) => query.bind(*value),
+            SqlValue::Decimal(value) => query.bind(*value),
             &SqlValue::Null => query.bind(None::<&str>),
         }
     }
@@ -63,6 +64,7 @@ pub fn bind_query_as<'q, E: Entity>(
             SqlValue::Time(value) => query_as.bind(*value),
             SqlValue::Date(value) => query_as.bind(*value),
             SqlValue::DateTime(value) => query_as.bind(*value),
+            SqlValue::Decimal(value) => query_as.bind(*value),
             &SqlValue::Null => query_as.bind(None::<&str>),
         }
     }
@@ -92,6 +94,7 @@ pub fn bind_query_scalar<'q, T>(
             SqlValue::Time(value) => query_scalar.bind(*value),
             SqlValue::Date(value) => query_scalar.bind(*value),
             SqlValue::DateTime(value) => query_scalar.bind(*value),
+            SqlValue::Decimal(value) => query_scalar.bind(*value),
             &SqlValue::Null => query_scalar.bind(None::<&str>),
         }
     }

@@ -1,4 +1,5 @@
 pub extern crate batis4sqlx_macros;
+extern crate core;
 
 use crate::wrapper::{SqlValue, Wrapper};
 use sqlx::mysql::MySqlRow;

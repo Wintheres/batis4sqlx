@@ -2,10 +2,11 @@ use crate::{
     Entity, LambdaField,
     repository::{bind_query, bind_query_as, bind_query_scalar},
 };
+use rust_decimal::Decimal;
 use sqlx::MySql;
 use sqlx::mysql::MySqlArguments;
 use sqlx::query::{Query, QueryAs, QueryScalar};
-use sqlx::types::chrono;
+use sqlx::types::chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use std::cell::RefCell;
 use std::cmp::PartialEq;
 use std::collections::{HashMap, HashSet};
@@ -1999,9 +2000,10 @@ pub enum SqlValue {
     F64(f64),
     Bool(bool),
     Str(String),
-    Time(chrono::NaiveTime),
-    Date(chrono::NaiveDate),
-    DateTime(chrono::NaiveDateTime),
+    Time(NaiveTime),
+    Date(NaiveDate),
+    DateTime(NaiveDateTime),
+    Decimal(Decimal),
 }
 
 impl From<isize> for SqlValue {
@@ -2094,20 +2096,26 @@ impl From<String> for SqlValue {
     }
 }
 
-impl From<chrono::NaiveTime> for SqlValue {
-    fn from(value: chrono::NaiveTime) -> Self {
+impl From<NaiveTime> for SqlValue {
+    fn from(value: NaiveTime) -> Self {
         SqlValue::Time(value)
     }
 }
 
-impl From<chrono::NaiveDate> for SqlValue {
-    fn from(value: chrono::NaiveDate) -> Self {
+impl From<NaiveDate> for SqlValue {
+    fn from(value: NaiveDate) -> Self {
         SqlValue::Date(value)
     }
 }
 
-impl From<chrono::NaiveDateTime> for SqlValue {
-    fn from(value: chrono::NaiveDateTime) -> Self {
+impl From<NaiveDateTime> for SqlValue {
+    fn from(value: NaiveDateTime) -> Self {
         SqlValue::DateTime(value)
+    }
+}
+
+impl From<Decimal> for SqlValue {
+    fn from(value: Decimal) -> Self {
+        SqlValue::Decimal(value)
     }
 }
