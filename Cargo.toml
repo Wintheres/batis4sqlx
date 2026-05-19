@@ -11,5 +11,5 @@ repository = "https://github.com/Wintheres/batis4sqlx"
 [dependencies]
 sqlx = { version = "0.8.6", features = ["mysql", "chrono", "runtime-tokio", "tls-native-tls", "rust_decimal"] }
 serde = { version = "1.0.219", features = ["derive"] }
-batis4sqlx-macros = "0.1.4"
+batis4sqlx-macros = {path = "D:/project/rust/self/batis4sqlx-macros"}
 rust_decimal = "1.40.0"

@@ -225,11 +225,20 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
         sql
     }
 
-    async fn aggregation(mut self) -> Result<Option<i64>> {
+    async fn aggregation(self) -> Result<Option<i64>> {
+        self.aggregation_db_opt(None).await
+    }
+
+    async fn aggregation_db(self, db: &'d MySqlPool) -> Result<Option<i64>> {
+        self.aggregation_db_opt(Some(db)).await
+    }
+
+    async fn aggregation_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<Option<i64>> {
         self.order.clear();
         let sql = self.sql();
+        let db = if let Some(db) = db { db } else { self.db };
         self.bind_query_scalar(sqlx::query_scalar::<MySql, i64>(&sql))
-            .fetch_optional(self.db)
+            .fetch_optional(db)
             .await
     }
 
@@ -261,17 +270,35 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
         self.aggregation().await
     }
 
-    pub async fn vec(mut self) -> Result<Vec<E>> {
+    pub async fn vec(self) -> Result<Vec<E>> {
+        self.vec_db_opt(None).await
+    }
+
+    pub async fn vec_db(self, db: &'d MySqlPool) -> Result<Vec<E>> {
+        self.vec_db_opt(Some(db)).await
+    }
+
+    pub async fn vec_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<Vec<E>> {
         let sql = self.sql();
+        let db = if let Some(db) = db { db } else { self.db };
         self.bind_query_as::<E>(sqlx::query_as(&sql))
-            .fetch_all(self.db)
+            .fetch_all(db)
             .await
     }
 
-    pub async fn opt(mut self) -> Result<Option<E>> {
+    pub async fn opt(self) -> Result<Option<E>> {
+        self.opt_db_opt(None).await
+    }
+
+    pub async fn opt_db(self, db: &'d MySqlPool) -> Result<Option<E>> {
+        self.opt_db_opt(Some(db)).await
+    }
+
+    pub async fn opt_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<Option<E>> {
         let sql = self.sql();
+        let db = if let Some(db) = db { db } else { self.db };
         self.bind_query_as::<E>(sqlx::query_as(&sql))
-            .fetch_optional(self.db)
+            .fetch_optional(db)
             .await
     }
 }
@@ -465,16 +492,25 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
         sql
     }
 
-    pub async fn execute(mut self) -> Result<u64> {
+    pub async fn execute(self) -> Result<u64> {
+        self.execute_db_opt(None).await
+    }
+
+    pub async fn execute_db(self, db: &'d MySqlPool) -> Result<u64> {
+        self.execute_db_opt(Some(db)).await
+    }
+
+    pub async fn execute_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<u64> {
         let sql = self.sql();
         let values = self
             .set_value
             .iter()
             .map(|value| value.clone())
             .collect::<Vec<_>>();
+        let db = if let Some(db) = db { db } else { self.db };
         Ok(self
             .bind_query(bind_query(sqlx::query(&sql), &values))
-            .execute(self.db)
+            .execute(db)
             .await?
             .rows_affected())
     }
@@ -577,11 +613,20 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> DeleteWra
         sql
     }
 
-    pub async fn execute(mut self) -> Result<u64> {
+    pub async fn execute(self) -> Result<u64> {
+        self.execute_db_opt(None).await
+    }
+
+    pub async fn execute_db(self, db: &'d MySqlPool) -> Result<u64> {
+        self.execute_db_opt(Some(db)).await
+    }
+
+    pub async fn execute_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<u64> {
         let sql = self.sql();
+        let db = if let Some(db) = db { db } else { self.db };
         Ok(self
             .bind_query(sqlx::query(&sql))
-            .execute(self.db)
+            .execute(db)
             .await?
             .rows_affected())
     }
