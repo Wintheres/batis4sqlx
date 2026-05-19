@@ -1797,7 +1797,7 @@ pub trait Wrapper<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Where<'a> {
     field: &'a str,
     relationship: Relationship,
@@ -1843,6 +1843,7 @@ impl<'a> Where<'a> {
     }
 }
 
+#[derive(Clone)]
 pub struct Bracket {
     left: RefCell<HashMap<usize, usize>>,
     right: RefCell<HashMap<usize, usize>>,
@@ -1887,6 +1888,7 @@ impl Bracket {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct GroupHaving<'a> {
     fields: Vec<&'a str>,
     having: Option<&'a str>,
@@ -1915,6 +1917,7 @@ impl<'a> GroupHaving<'a> {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct Order<'a> {
     pub(crate) field: &'a str,
     pub(crate) asc_desc: bool,
@@ -1926,7 +1929,7 @@ impl<'a> Order<'a> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum Relationship {
     // ==
     Eq,

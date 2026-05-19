@@ -19,6 +19,7 @@ pub trait Entity {
     fn primary_key<'b>() -> LambdaField<'b>;
 }
 
+#[derive(Clone)]
 pub struct LambdaField<'a>(&'a str);
 
 impl<'a> LambdaField<'a> {
@@ -56,7 +57,10 @@ pub trait ServiceImpl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send +
         chain::DeleteWrapper::<E>::new(self.borrow_db())
     }
 
-    fn get_by_primary_key<K>(&'d self, primary_key_value: K) -> impl Future<Output = Result<Option<E>>>
+    fn get_by_primary_key<K>(
+        &'d self,
+        primary_key_value: K,
+    ) -> impl Future<Output = Result<Option<E>>>
     where
         K: Into<SqlValue> + Clone,
     {

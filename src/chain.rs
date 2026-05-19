@@ -7,6 +7,7 @@ use sqlx::{FromRow, MySql, MySqlPool};
 use std::collections::HashSet;
 use std::marker::PhantomData;
 
+#[derive(Clone)]
 pub struct QueryWrapper<'a, 'd, E>
 where
     E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin,
@@ -327,6 +328,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> Wrapper<'
     }
 }
 
+#[derive(Clone)]
 pub struct UpdateWrapper<'a, 'd, E>
 where
     E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin,
