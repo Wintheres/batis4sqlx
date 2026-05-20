@@ -3,7 +3,7 @@ use crate::repository::bind_query;
 use crate::wrapper::{Bracket, GroupHaving, Order, SqlValue, Where, Wrapper};
 use crate::{Entity, LambdaField};
 use sqlx::mysql::MySqlRow;
-use sqlx::{FromRow, MySql, MySqlPool};
+use sqlx::{FromRow, MySql, MySqlPool, Transaction};
 use std::collections::HashSet;
 use std::marker::PhantomData;
 
@@ -225,20 +225,11 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
         sql
     }
 
-    async fn aggregation(self) -> Result<Option<i64>> {
-        self.aggregation_db_opt(None).await
-    }
-
-    async fn aggregation_db(self, db: &'d MySqlPool) -> Result<Option<i64>> {
-        self.aggregation_db_opt(Some(db)).await
-    }
-
-    async fn aggregation_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<Option<i64>> {
+    async fn aggregation(mut self) -> Result<Option<i64>> {
         self.order.clear();
         let sql = self.sql();
-        let db = if let Some(db) = db { db } else { self.db };
         self.bind_query_scalar(sqlx::query_scalar::<MySql, i64>(&sql))
-            .fetch_optional(db)
+            .fetch_optional(self.db)
             .await
     }
 
@@ -274,32 +265,39 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
         self.vec_db_opt(None).await
     }
 
-    pub async fn vec_db(self, db: &'d MySqlPool) -> Result<Vec<E>> {
+    pub async fn vec_db(self, db: &mut Transaction<'_, MySql>) -> Result<Vec<E>> {
         self.vec_db_opt(Some(db)).await
     }
 
-    pub async fn vec_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<Vec<E>> {
+    pub async fn vec_db_opt(mut self, db: Option<&mut Transaction<'_, MySql>>) -> Result<Vec<E>> {
         let sql = self.sql();
-        let db = if let Some(db) = db { db } else { self.db };
-        self.bind_query_as::<E>(sqlx::query_as(&sql))
-            .fetch_all(db)
-            .await
+        let query = self.bind_query_as::<E>(sqlx::query_as(&sql));
+        if let Some(db) = db {
+            query.fetch_all(&mut **db).await
+        } else {
+            query.fetch_all(self.db).await
+        }
     }
 
     pub async fn opt(self) -> Result<Option<E>> {
         self.opt_db_opt(None).await
     }
 
-    pub async fn opt_db(self, db: &'d MySqlPool) -> Result<Option<E>> {
+    pub async fn opt_db(self, db: &mut Transaction<'_, MySql>) -> Result<Option<E>> {
         self.opt_db_opt(Some(db)).await
     }
 
-    pub async fn opt_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<Option<E>> {
+    pub async fn opt_db_opt(
+        mut self,
+        db: Option<&mut Transaction<'_, MySql>>,
+    ) -> Result<Option<E>> {
         let sql = self.sql();
-        let db = if let Some(db) = db { db } else { self.db };
-        self.bind_query_as::<E>(sqlx::query_as(&sql))
-            .fetch_optional(db)
-            .await
+        let query = self.bind_query_as::<E>(sqlx::query_as(&sql));
+        if let Some(db) = db {
+            query.fetch_optional(&mut **db).await
+        } else {
+            query.fetch_optional(self.db).await
+        }
     }
 }
 
@@ -496,23 +494,24 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> UpdateWra
         self.execute_db_opt(None).await
     }
 
-    pub async fn execute_db(self, db: &'d MySqlPool) -> Result<u64> {
+    pub async fn execute_db(self, db: &mut Transaction<'_, MySql>) -> Result<u64> {
         self.execute_db_opt(Some(db)).await
     }
 
-    pub async fn execute_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<u64> {
+    pub async fn execute_db_opt(mut self, db: Option<&mut Transaction<'_, MySql>>) -> Result<u64> {
         let sql = self.sql();
         let values = self
             .set_value
             .iter()
             .map(|value| value.clone())
             .collect::<Vec<_>>();
-        let db = if let Some(db) = db { db } else { self.db };
-        Ok(self
-            .bind_query(bind_query(sqlx::query(&sql), &values))
-            .execute(db)
-            .await?
-            .rows_affected())
+        let executer = self.bind_query(bind_query(sqlx::query(&sql), &values));
+        let result = if let Some(db) = db {
+            executer.execute(&mut **db).await
+        } else {
+            executer.execute(self.db).await
+        };
+        Ok(result?.rows_affected())
     }
 }
 
@@ -617,18 +616,19 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> DeleteWra
         self.execute_db_opt(None).await
     }
 
-    pub async fn execute_db(self, db: &'d MySqlPool) -> Result<u64> {
+    pub async fn execute_db(self, db: &mut Transaction<'_, MySql>) -> Result<u64> {
         self.execute_db_opt(Some(db)).await
     }
 
-    pub async fn execute_db_opt(mut self, db: Option<&'d MySqlPool>) -> Result<u64> {
+    pub async fn execute_db_opt(mut self, db: Option<&mut Transaction<'_, MySql>>) -> Result<u64> {
         let sql = self.sql();
-        let db = if let Some(db) = db { db } else { self.db };
-        Ok(self
-            .bind_query(sqlx::query(&sql))
-            .execute(db)
-            .await?
-            .rows_affected())
+        let executer = self.bind_query(sqlx::query(&sql));
+        let result = if let Some(db) = db {
+            executer.execute(&mut **db).await
+        } else {
+            executer.execute(self.db).await
+        };
+        Ok(result?.rows_affected())
     }
 }
 
