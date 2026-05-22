@@ -1549,30 +1549,27 @@ pub trait Wrapper<'a> {
         self
     }
 
-    fn null<F, V>(self, field_func: F) -> Self
+    fn null<F>(self, field_func: F) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.null_field::<V>(*field_func())
+        self.null_field(*field_func())
     }
 
-    fn null_flag<F, V>(mut self, field_func: F, flag: bool) -> Self
+    fn null_flag<F>(mut self, field_func: F, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
-            self = self.null::<F, V>(field_func);
+            self = self.null::<F>(field_func);
         }
         self
     }
 
-    fn null_field<V>(mut self, field: &'a str) -> Self
+    fn null_field(mut self, field: &'a str) -> Self
     where
-        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::IsNull, vec![]));
@@ -1585,48 +1582,44 @@ pub trait Wrapper<'a> {
         Self: Sized,
     {
         if flag {
-            self = self.null_field::<V>(field);
+            self = self.null_field(field);
         }
         self
     }
 
-    fn not_null<F, V>(self, field_func: F) -> Self
+    fn not_null<F>(self, field_func: F) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
-        self.not_null_field::<V>(*field_func())
+        self.not_null_field(*field_func())
     }
 
-    fn not_null_flag<F, V>(mut self, field_func: F, flag: bool) -> Self
+    fn not_null_flag<F>(mut self, field_func: F, flag: bool) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
-        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
-            self = self.not_null::<F, V>(field_func);
+            self = self.not_null::<F>(field_func);
         }
         self
     }
 
-    fn not_null_field<V>(mut self, field: &'a str) -> Self
+    fn not_null_field(mut self, field: &'a str) -> Self
     where
-        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         self.wheres_push(Where::new(field, Relationship::IsNotNull, vec![]));
         self
     }
 
-    fn not_null_field_flag<V>(mut self, field: &'a str, flag: bool) -> Self
+    fn not_null_field_flag(mut self, field: &'a str, flag: bool) -> Self
     where
-        V: Into<SqlValue> + Clone,
         Self: Sized,
     {
         if flag {
-            self = self.not_null_field::<V>(field);
+            self = self.not_null_field(field);
         }
         self
     }
