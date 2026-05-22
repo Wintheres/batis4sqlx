@@ -1064,6 +1064,93 @@ pub trait Wrapper<'a> {
         self
     }
 
+    fn not_like_left<F, V>(self, field_func: F, value: V) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        self.not_like_left_field(*field_func(), value)
+    }
+
+    fn not_like_left_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_left(field_func, value);
+        }
+        self
+    }
+
+    fn not_like_left_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.not_like_left_field(*field_func(), value);
+        }
+        self
+    }
+
+    fn not_like_left_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_left_opt(field_func, value);
+        }
+        self
+    }
+
+    fn not_like_left_field<V>(mut self, field: &'a str, value: V) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        self.wheres_push(Where::new(field, Relationship::NotLikeLeft, vec![value.into()]));
+        self
+    }
+
+    fn not_like_left_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_left_field(field, value);
+        }
+        self
+    }
+
+    fn not_like_left_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.not_like_left_field(field, value);
+        }
+        self
+    }
+
+    fn not_like_left_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_left_field_opt(field, value);
+        }
+        self
+    }
+
     fn like_right<F, V>(self, field_func: F, value: V) -> Self
     where
         F: FnOnce() -> LambdaField<'a>,
@@ -1151,6 +1238,93 @@ pub trait Wrapper<'a> {
     {
         if flag {
             self = self.like_right_field_opt(field, value);
+        }
+        self
+    }
+
+    fn not_like_right<F, V>(self, field_func: F, value: V) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        self.not_like_right_field(*field_func(), value)
+    }
+
+    fn not_like_right_flag<F, V>(mut self, field_func: F, value: V, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_right(field_func, value);
+        }
+        self
+    }
+
+    fn not_like_right_opt<F, V>(mut self, field_func: F, value: Option<V>) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.not_like_right_field(*field_func(), value);
+        }
+        self
+    }
+
+    fn not_like_right_opt_flag<F, V>(mut self, field_func: F, value: Option<V>, flag: bool) -> Self
+    where
+        F: FnOnce() -> LambdaField<'a>,
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_right_opt(field_func, value);
+        }
+        self
+    }
+
+    fn not_like_right_field<V>(mut self, field: &'a str, value: V) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        self.wheres_push(Where::new(field, Relationship::NotLikeRight, vec![value.into()]));
+        self
+    }
+
+    fn not_like_right_field_flag<V>(mut self, field: &'a str, value: V, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_right_field(field, value);
+        }
+        self
+    }
+
+    fn not_like_right_field_opt<V>(mut self, field: &'a str, value: Option<V>) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if let Some(value) = value {
+            self = self.not_like_right_field(field, value);
+        }
+        self
+    }
+
+    fn not_like_right_field_opt_flag<V>(mut self, field: &'a str, value: Option<V>, flag: bool) -> Self
+    where
+        V: Into<SqlValue> + Clone,
+        Self: Sized,
+    {
+        if flag {
+            self = self.not_like_right_field_opt(field, value);
         }
         self
     }
@@ -1814,12 +1988,11 @@ impl<'a> Where<'a> {
             | Relationship::Gt
             | Relationship::Ge
             | Relationship::Lt
-            | Relationship::Le
-            | Relationship::Like
-            | Relationship::NotLike
-            | Relationship::LikeLeft
-            | Relationship::LikeRight => sql += " ?",
+            | Relationship::Le => sql += " ?",
             Relationship::Between | Relationship::NotBetween => sql += " ? AND ?",
+            Relationship::Like | Relationship::NotLike => sql += " CONCAT('%', ?, '%')",
+            Relationship::LikeLeft | Relationship::NotLikeLeft => sql += " CONCAT('%', ?)",
+            Relationship::LikeRight | Relationship::NotLikeRight => sql += " CONCAT(?, '%')",
             Relationship::In | Relationship::NotIn => {
                 let placeholders = self
                     .values
@@ -1947,6 +2120,10 @@ enum Relationship {
     LikeLeft,
     // LIKE 'str%'
     LikeRight,
+    // NOT LIKE '%str'
+    NotLikeLeft,
+    // NOT LIKE 'str%'
+    NotLikeRight,
     // IN
     In,
     // NOT IN
@@ -1969,7 +2146,9 @@ impl Relationship {
             Relationship::Between => "BETWEEN",
             Relationship::NotBetween => "NOT BETWEEN",
             Relationship::Like | Relationship::LikeLeft | Relationship::LikeRight => "LIKE",
-            Relationship::NotLike => "NOT LIKE",
+            Relationship::NotLike | Relationship::NotLikeLeft | Relationship::NotLikeRight => {
+                "NOT LIKE"
+            }
             Relationship::In => "IN",
             Relationship::NotIn => "NOT IN",
             Relationship::IsNull => "IS NULL",
