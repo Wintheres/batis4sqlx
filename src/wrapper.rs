@@ -1829,8 +1829,7 @@ impl<'a> Where<'a> {
                     .join(", ");
                 sql += &format!(" ({placeholders})");
             }
-            Relationship::IsNull => sql += " IS NULL",
-            Relationship::IsNotNull => sql += "IS NOT NULL",
+            Relationship::IsNull | Relationship::IsNotNull => {}
         }
         sql
     }
