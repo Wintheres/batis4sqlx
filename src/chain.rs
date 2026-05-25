@@ -2,6 +2,7 @@ use crate::Result;
 use crate::repository::bind_query;
 use crate::wrapper::{Bracket, GroupHaving, Order, SqlValue, Where, Wrapper};
 use crate::{Entity, LambdaField};
+use rust_decimal::Decimal;
 use sqlx::mysql::MySqlRow;
 use sqlx::{FromRow, MySql, MySqlPool, Transaction};
 use std::collections::HashSet;
@@ -225,7 +226,7 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
         sql
     }
 
-    async fn aggregation(mut self) -> Result<Option<i64>> {
+    async fn aggregation_integer(mut self) -> Result<Option<i64>> {
         self.order.clear();
         let sql = self.sql();
         self.bind_query_scalar(sqlx::query_scalar::<MySql, i64>(&sql))
@@ -233,32 +234,61 @@ impl<'a, 'd, E: Entity + for<'r> FromRow<'r, MySqlRow> + Send + Unpin> QueryWrap
             .await
     }
 
+    async fn aggregation_decimal(mut self) -> Result<Option<Decimal>> {
+        self.order.clear();
+        let sql = self.sql();
+        self.bind_query_scalar(sqlx::query_scalar::<MySql, Decimal>(&sql))
+            .fetch_optional(self.db)
+            .await
+    }
+
     pub async fn exists(mut self) -> Result<bool> {
         self.field = vec!["1"];
-        Ok(self.aggregation().await?.is_some())
+        Ok(self.aggregation_integer().await?.is_some())
     }
 
     pub async fn count(mut self) -> Result<Option<i64>> {
         self.field = vec!["COUNT(*)"];
-        self.aggregation().await
+        self.aggregation_integer().await
     }
 
-    pub async fn sum(mut self, field: &'a str) -> Result<Option<i64>> {
+    pub async fn sum<F>(self, field_func: F) -> Result<Option<Decimal>>
+    where
+        F: FnOnce() -> LambdaField<'a>,
+    {
+        self.sum_field(*field_func()).await
+    }
+
+    pub async fn sum_field(mut self, field: &'a str) -> Result<Option<Decimal>> {
         let field = format!("SUM({})", field);
         self.field = vec![&field];
-        self.aggregation().await
+        self.aggregation_decimal().await
     }
 
-    pub async fn max(mut self, field: &'a str) -> Result<Option<i64>> {
+    pub async fn max<F>(self, field_func: F) -> Result<Option<Decimal>>
+    where
+        F: FnOnce() -> LambdaField<'a>,
+    {
+        self.max_field(*field_func()).await
+    }
+
+    pub async fn max_field(mut self, field: &'a str) -> Result<Option<Decimal>> {
         let field = format!("MAX({})", field);
         self.field = vec![&field];
-        self.aggregation().await
+        self.aggregation_decimal().await
     }
 
-    pub async fn min(mut self, field: &'a str) -> Result<Option<i64>> {
+    pub async fn min<F>(self, field_func: F) -> Result<Option<Decimal>>
+    where
+        F: FnOnce() -> LambdaField<'a>,
+    {
+        self.min_field(*field_func()).await
+    }
+
+    pub async fn min_field(mut self, field: &'a str) -> Result<Option<Decimal>> {
         let field = format!("MIN({})", field);
         self.field = vec![&field];
-        self.aggregation().await
+        self.aggregation_decimal().await
     }
 
     pub async fn vec(self) -> Result<Vec<E>> {
